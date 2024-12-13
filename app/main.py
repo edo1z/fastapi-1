@@ -2,6 +2,14 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI, Depends, HTTPException
 from sqlmodel import Session, select
 from . import models
+from . import chat
+from pydantic import BaseModel
+
+class ChatRequest(BaseModel):
+    message: str
+
+class ChatResponse(BaseModel):
+    response: str
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -40,3 +48,9 @@ def create_user(user: models.UserCreate, db: Session = Depends(models.get_db)):
 @app.get("/users/", response_model=list[models.User])
 def read_users(db: Session = Depends(models.get_db)):
     return db.exec(select(models.User)).all()
+
+
+@app.post("/chat", response_model=ChatResponse)
+def create_chat(chat_request: ChatRequest):
+    response = chat.get_chat_response(chat_request.message)
+    return ChatResponse(response=response)
