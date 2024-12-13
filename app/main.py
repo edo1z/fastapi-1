@@ -1,5 +1,6 @@
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, Depends, HTTPException
+from fastapi.responses import StreamingResponse
 from sqlmodel import Session, select
 from . import models
 from . import chat
@@ -50,7 +51,9 @@ def read_users(db: Session = Depends(models.get_db)):
     return db.exec(select(models.User)).all()
 
 
-@app.post("/chat", response_model=ChatResponse)
-def create_chat(chat_request: ChatRequest):
-    response = chat.get_chat_response(chat_request.message)
-    return ChatResponse(response=response)
+@app.post("/chat")
+async def create_chat(chat_request: ChatRequest):
+    return StreamingResponse(
+        chat.get_chat_stream(chat_request.message),
+        media_type="text/event-stream"
+    )
