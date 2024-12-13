@@ -1,11 +1,14 @@
+from contextlib import asynccontextmanager
 from fastapi import FastAPI, Depends
-from sqlalchemy.orm import Session
-from . import models, schemas
-from .database import engine, get_db
+from sqlmodel import Session, select
+from . import models
 
-models.Base.metadata.create_all(bind=engine)
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    models.create_db_and_tables()
+    yield
 
-app = FastAPI()
+app = FastAPI(lifespan=lifespan)
 
 
 @app.get("/")
@@ -18,15 +21,15 @@ def read_item(item_id: int, q: str = None):
     return {"item_id": item_id, "q": q}
 
 
-@app.post("/users/", response_model=schemas.User)
-def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
-    db_user = models.User(**user.model_dump())
+@app.post("/users/", response_model=models.User)
+def create_user(user: models.UserCreate, db: Session = Depends(models.get_db)):
+    db_user = models.User.model_validate(user)
     db.add(db_user)
     db.commit()
     db.refresh(db_user)
     return db_user
 
 
-@app.get("/users/", response_model=list[schemas.User])
-def read_users(db: Session = Depends(get_db)):
-    return db.query(models.User).all()
+@app.get("/users/", response_model=list[models.User])
+def read_users(db: Session = Depends(models.get_db)):
+    return db.exec(select(models.User)).all()
