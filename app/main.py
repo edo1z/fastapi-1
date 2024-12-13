@@ -1,5 +1,5 @@
 from contextlib import asynccontextmanager
-from fastapi import FastAPI, Depends
+from fastapi import FastAPI, Depends, HTTPException
 from sqlmodel import Session, select
 from . import models
 
@@ -23,6 +23,13 @@ def read_item(item_id: int, q: str = None):
 
 @app.post("/users/", response_model=models.User)
 def create_user(user: models.UserCreate, db: Session = Depends(models.get_db)):
+    existing_user = db.exec(select(models.User).where(models.User.email == user.email)).first()
+    if existing_user:
+        raise HTTPException(
+            status_code=400,
+            detail="このメールアドレスは既に登録されています"
+        )
+
     db_user = models.User.model_validate(user)
     db.add(db_user)
     db.commit()

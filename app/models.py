@@ -1,6 +1,7 @@
 from datetime import datetime, UTC
 from typing import Optional
 from sqlmodel import SQLModel, Field, create_engine, Session
+from pydantic import EmailStr
 from .config import DATABASE_URL
 
 # データベース設定
@@ -9,8 +10,16 @@ engine = create_engine(DATABASE_URL)
 
 # モデル定義（schemas.pyとmodels.pyが統合される）
 class UserBase(SQLModel):
-    name: str
-    email: str = Field(unique=True, index=True)
+    name: str = Field(
+        min_length=1,
+        max_length=50,
+        description="ユーザー名は1-50文字で入力してください"
+    )
+    email: EmailStr = Field(
+        unique=True,
+        index=True,
+        description="有効なメールアドレスを入力してください"
+    )
 
 
 class User(UserBase, table=True):
@@ -25,7 +34,11 @@ class User(UserBase, table=True):
 
 
 class UserCreate(UserBase):
-    password: str
+    password: str = Field(
+        min_length=8,
+        max_length=100,
+        description="パスワードは8文字以上で入力してください"
+    )
 
 
 # DBセッション依存性
