@@ -7,6 +7,7 @@ from . import chat
 from . import search
 from pydantic import BaseModel
 from . import classification
+from . import extraction
 
 
 class ChatRequest(BaseModel):
@@ -73,4 +74,10 @@ async def search_pages():
 @app.post("/classify")
 async def classify_text(text: str):
     result = await classification.get_classification(text)
+    return result
+
+
+@app.post("/extract")
+async def extract_info(text: str):
+    result = await extraction.get_extraction(text)
     return result
