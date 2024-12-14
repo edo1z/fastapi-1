@@ -13,7 +13,7 @@ class TextClassification(BaseModel):
 
 async def get_classification(text: str) -> TextClassification:
     model = ChatOpenAI(
-        model="gpt-3.5-turbo",
+        model="gpt-4o",
         openai_api_key=OPENAI_API_KEY,
         temperature=0
     ).with_structured_output(TextClassification)
