@@ -20,6 +20,7 @@ langchain = "^0.3.11"
 langchain-openai = "^0.2.12"
 langchain-community = "^0.3.11"
 pypdf = "^5.1.0"
+langgraph = "^0.2.59"
 
 
 [build-system]
