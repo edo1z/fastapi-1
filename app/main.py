@@ -8,6 +8,7 @@ from . import search
 from pydantic import BaseModel
 from . import classification
 from . import extraction
+from . import chatbot
 
 
 class ChatRequest(BaseModel):
@@ -16,6 +17,11 @@ class ChatRequest(BaseModel):
 
 class ChatResponse(BaseModel):
     response: str
+
+
+class ChatbotRequest(BaseModel):
+    message: str
+    thread_id: str
 
 
 @asynccontextmanager
@@ -81,3 +87,11 @@ async def classify_text(text: str):
 async def extract_info(text: str):
     result = await extraction.get_extraction(text)
     return result
+
+
+@app.post("/chatbot")
+async def create_chatbot_response(request: ChatbotRequest):
+    return StreamingResponse(
+        chatbot.chatbot_response(request.message, request.thread_id),
+        media_type="text/event-stream"
+    )
