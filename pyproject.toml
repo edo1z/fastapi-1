@@ -18,6 +18,8 @@ sqlmodel = "^0.0.22"
 email-validator = "^2.2.0"
 langchain = "^0.3.11"
 langchain-openai = "^0.2.12"
+langchain-community = "^0.3.11"
+pypdf = "^5.1.0"
 
 
 [build-system]
