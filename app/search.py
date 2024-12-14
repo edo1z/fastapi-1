@@ -1,5 +1,6 @@
 from langchain_community.document_loaders import PyPDFLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
+from langchain_core.vectorstores import InMemoryVectorStore
 from langchain_openai import OpenAIEmbeddings
 from .config import OPENAI_API_KEY
 import os
@@ -22,11 +23,13 @@ def count_pages():
         model="text-embedding-3-large", openai_api_key=OPENAI_API_KEY
     )
 
-    vector_1 = embeddings.embed_query(all_splits[0].page_content)
-    vector_2 = embeddings.embed_query(all_splits[1].page_content)
+    vector_store = InMemoryVectorStore(embeddings)
+    ids = vector_store.add_documents(documents=all_splits)
 
-    assert len(vector_1) == len(vector_2)
-    print(f"Generated vectors of length {len(vector_1)}\n")
-    print(vector_1[:10])
+    results = vector_store.similarity_search(
+        "How many distribution centers does Nike have in the US?"
+    )
 
-    return len(vector_1)
+    print(results[0])
+
+    return results
