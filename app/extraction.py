@@ -17,10 +17,14 @@ class Person(BaseModel):
     )
 
 
-async def get_extraction(text: str) -> Person:
+class People(BaseModel):
+    data: list[Person] = Field(default=[], description="List of person")
+
+
+async def get_extraction(text: str) -> People:
     model = ChatOpenAI(
         model="gpt-4o", openai_api_key=OPENAI_API_KEY, temperature=0
-    ).with_structured_output(Person)
+    ).with_structured_output(People)
 
     prompt_template = ChatPromptTemplate.from_messages(
         [
@@ -29,7 +33,7 @@ async def get_extraction(text: str) -> Person:
                 "あなたは専門的な情報抽出アルゴリズムです。"
                 "テキストから関連情報のみを抽出してください。"
                 "抽出を求められた属性の値が不明な場合は、"
-                "その属性の値としてnullを返してください。"
+                "その属性の値としてnullを返してください。",
             ),
             ("human", "{text}"),
         ]
