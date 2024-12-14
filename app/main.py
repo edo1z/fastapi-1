@@ -91,7 +91,5 @@ async def extract_info(text: str):
 
 @app.post("/chatbot")
 async def create_chatbot_response(request: ChatbotRequest):
-    return StreamingResponse(
-        chatbot.chatbot_response(request.message, request.thread_id),
-        media_type="text/event-stream"
-    )
+    response = await chatbot.chatbot_response(request.message, request.thread_id)
+    return {"response": response}
