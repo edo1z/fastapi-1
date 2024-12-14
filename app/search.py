@@ -6,7 +6,7 @@ from .config import OPENAI_API_KEY
 import os
 
 
-def count_pages():
+async def count_pages():
     # 現在のファイル（search.py）のディレクトリを基準に絶対パスを構築
     current_dir = os.path.dirname(os.path.abspath(__file__))
     file_path = os.path.join(current_dir, "..", "example_data", "nke-10k-2023.pdf")
@@ -26,7 +26,7 @@ def count_pages():
     vector_store = InMemoryVectorStore(embeddings)
     ids = vector_store.add_documents(documents=all_splits)
 
-    results = vector_store.similarity_search(
+    results = await vector_store.asimilarity_search_with_score(
         "How many distribution centers does Nike have in the US?"
     )
 

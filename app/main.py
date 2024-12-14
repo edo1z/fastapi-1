@@ -65,5 +65,5 @@ async def create_chat(chat_request: ChatRequest):
 
 
 @app.get("/search")
-def search_pages():
-    return search.count_pages()
+async def search_pages():
+    return await search.count_pages()
