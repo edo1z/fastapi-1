@@ -1,26 +1,32 @@
 from langchain_openai import ChatOpenAI
 from langchain_core.prompts import ChatPromptTemplate
+from pydantic import BaseModel, Field
 from .config import OPENAI_API_KEY
 
 
-async def get_classification(text: str) -> str:
+class TextClassification(BaseModel):
+    category: str = Field(description="質問・要望・苦情・その他のいずれか")
+    sentiment: str = Field(description="テキストの感情（ポジティブ・ネガティブ・ニュートラル）")
+    aggressiveness: int = Field(description="テキストの攻撃性（1-10のスケール）")
+    language: str = Field(description="テキストの使用言語")
+
+
+async def get_classification(text: str) -> TextClassification:
     model = ChatOpenAI(
         model="gpt-3.5-turbo",
         openai_api_key=OPENAI_API_KEY,
         temperature=0
-    )
+    ).with_structured_output(TextClassification)
 
     prompt_template = ChatPromptTemplate.from_messages([
         ("system", """
-        あなたはテキスト分類の専門家です。
-        入力されたテキストを以下のカテゴリのいずれかに分類してください：
+        テキストを分析し、以下の情報を抽出してください：
+        - カテゴリ（質問・要望・苦情・その他）
+        - 感情（ポジティブ・ネガティブ・ニュートラル）
+        - 攻撃性（1-10のスケール）
+        - 使用言語
 
-        - 質問：疑問符や「〜ですか？」「〜かな？」などの疑問形、または情報を求める文
-        - 要望：「〜してほしい」「〜お願いします」などの依頼や要求
-        - 苦情：不満、クレーム、否定的な意見
-        - その他：上記に当てはまらないもの
-
-        カテゴリ名のみを返してください。
+        指定された形式で結果を返してください。
         """),
         ("user", "{text}")
     ])
@@ -28,4 +34,4 @@ async def get_classification(text: str) -> str:
     prompt = prompt_template.invoke({"text": text})
     response = await model.ainvoke(prompt)
 
-    return response.content
+    return response

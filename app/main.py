@@ -73,4 +73,4 @@ async def search_pages():
 @app.post("/classify")
 async def classify_text(text: str):
     result = await classification.get_classification(text)
-    return {"classification": result}
+    return result
