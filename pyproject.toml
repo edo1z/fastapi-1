@@ -21,6 +21,9 @@ langchain-openai = "^0.2.12"
 langchain-community = "^0.3.11"
 pypdf = "^5.1.0"
 langgraph = "^0.2.59"
+langchain-anthropic = "^0.3.0"
+tavily-python = "^0.5.0"
+langgraph-checkpoint-sqlite = "^2.0.1"
 
 
 [build-system]
