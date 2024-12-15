@@ -9,6 +9,7 @@ from pydantic import BaseModel
 from . import classification
 from . import extraction
 from . import chatbot
+from . import search_agent
 
 
 class ChatRequest(BaseModel):
@@ -93,3 +94,9 @@ async def extract_info(text: str):
 async def create_chatbot_response(request: ChatbotRequest):
     response = await chatbot.chatbot_response(request.message, request.thread_id)
     return {"response": response}
+
+
+@app.post("/search-agent")
+async def search_with_agent(query: str):
+    result = search_agent.exec_search_agent(query)
+    return {"results": result}
