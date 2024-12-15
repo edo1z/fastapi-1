@@ -2,6 +2,7 @@ from langchain_community.tools.tavily_search import TavilySearchResults
 from langchain_openai import ChatOpenAI
 from langchain_core.messages import HumanMessage
 from .config import TAVILY_API_KEY, OPENAI_API_KEY
+from langgraph.prebuilt import create_react_agent
 
 
 def exec_search_agent(query: str) -> str:
@@ -12,11 +13,12 @@ def exec_search_agent(query: str) -> str:
         model="gpt-4o",
         openai_api_key=OPENAI_API_KEY,
     )
-    model_with_tools = model.bind_tools(tools)
+    agent_executor = create_react_agent(model, tools)
 
-    response = model_with_tools.invoke([HumanMessage(content=query)])
+    response = agent_executor.invoke({"messages": [HumanMessage(content=query)]})
 
-    print(f"ContentString: {response.content}")
-    print(f"ToolCalls: {response.tool_calls}")
+    # デバッグ出力を追加
+    for i, msg in enumerate(response["messages"]):
+        print(f"Message {i}: {msg.type} - {msg.content[:100]}...")
 
-    return response.tool_calls
+    return response["messages"][-1].content
